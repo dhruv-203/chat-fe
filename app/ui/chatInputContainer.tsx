@@ -21,7 +21,7 @@ function ChatInputContainer({
 }) {
   const [message, setMessage] = useState("");
   const handleSendMessage = async () => {
-    if (message && receiverID === receiver.id && message.trim() !== "") {
+    if (receiverID === receiver.id) {
       const resData = await sendMessage(message, receiver.id);
       if (resData.data.success) {
         updateChatData(resData.data.data);
@@ -53,6 +53,7 @@ function ChatInputContainer({
       <button
         className=" basis-1/4 rounded-lg bg-gray-800 px-4 py-2 text-white hover:bg-gray-700 font-semibold"
         type="submit"
+        disabled={message.trim() === ""}
       >
         Send
       </button>
