@@ -64,8 +64,10 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   }, [user]);
 
   useEffect(() => {
-    getAllUsers();
-  }, []);
+    if (user) {
+      getAllUsers();
+    }
+  }, [user]);
 
   const updateUser = (user: User | null) => {
     setUser(user);
