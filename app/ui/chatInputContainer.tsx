@@ -21,7 +21,7 @@ function ChatInputContainer({
 }) {
   const [message, setMessage] = useState("");
   const handleSendMessage = async () => {
-    if (message && receiverID === receiver.id) {
+    if (message && receiverID === receiver.id && message.trim() !== "") {
       const resData = await sendMessage(message, receiver.id);
       if (resData.data.success) {
         updateChatData(resData.data.data);
