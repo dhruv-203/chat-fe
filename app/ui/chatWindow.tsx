@@ -1,90 +1,26 @@
 "use client";
 import { fetchChatData } from "@/utils/fetchChatData";
 import { MessageType } from "@/utils/types";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { IoVideocam } from "react-icons/io5";
 import { toast } from "react-toastify";
 import { useAppContext } from "../AppContext";
 import ChatInputContainer from "./chatInputContainer";
 import CircleDiv from "./circleDiv";
 import Message from "./message";
 import UsernameDiv from "./usernameDiv";
-
 const ChatWindow = ({
   className,
   receiver,
 }: {
   className: string;
-  receiver: { id: number; name: string; profilePicture: string } | null;
+  receiver: { id: string; name: string; profilePicture: string } | null;
 }) => {
   const { connectedUsers, user, socket } = useAppContext();
-  //   {
-  //     id: 1,
-  //     senderId: 1,
-  //     receiverId: 2,
-  //     message: "Hello, how are you?",
-  //     date: "2023-03-01 10:00:00",
-  //   },
-  //   {
-  //     id: 2,
-  //     senderId: 2,
-  //     receiverId: 1,
-  //     message: "I am fine, thank you!",
-  //     date: "2023-03-01 10:00:00",
-  //   },
-  //   {
-  //     id: 3,
-  //     senderId: 1,
-  //     receiverId: 2,
-  //     message: "What are you doing?",
-  //     date: "2023-03-01 10:00:00",
-  //   },
-  //   {
-  //     id: 4,
-  //     senderId: 2,
-  //     receiverId: 1,
-  //     message: "I am working on a project, what about you?",
-  //     date: "2023-03-01 10:00:00",
-  //   },
-  //   {
-  //     id: 5,
-  //     senderId: 1,
-  //     receiverId: 2,
-  //     message: "I am doing well, thanks!",
-  //     date: "2023-03-01 10:00:00",
-  //   },
-  //   {
-  //     id: 6,
-  //     senderId: 2,
-  //     receiverId: 1,
-  //     message: "What you will eat today?",
-  //     date: "2023-03-01 10:00:00",
-  //   },
-  //   {
-  //     id: 7,
-  //     senderId: 1,
-  //     receiverId: 2,
-  //     message: "I will eat pizza, thanks!",
-  //     date: "2023-03-01 10:00:00",
-  //   },
-  //   {
-  //     id: 8,
-  //     senderId: 1,
-  //     receiverId: 2,
-  //     message: "What about you?",
-  //     date: "2023-03-01 10:00:00",
-  //   },
-  //   {
-  //     id: 9,
-  //     senderId: 2,
-  //     receiverId: 1,
-  //     message: "I will eat sushi, thanks!",
-  //     date: "2023-03-01 10:00:00",
-  //   },
-  // ];
   const [chatData, setChatData] = useState<MessageType[]>([]);
   const updateChatData = (message: MessageType) => {
     setChatData((prev) => [...prev, message]);
-    console.log(chatData);
   };
   const chatDisplayRef = useRef<HTMLDivElement>(null);
   const scrollToBottom = () => {
@@ -92,7 +28,11 @@ const ChatWindow = ({
       chatDisplayRef.current.scrollTop = chatDisplayRef.current.scrollHeight;
     }
   };
-
+  const recieveMessages = (message: MessageType) => {
+    setChatData((prev) => [...prev, message]);
+  };
+  const isActive = connectedUsers.some((con) => con.id === receiver?.id);
+  const router = useRouter();
   // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
@@ -105,7 +45,6 @@ const ChatWindow = ({
         if (res.statusCode === 200) {
           setChatData([...res.data]);
         } else {
-          console.log(res);
           toast.error("Error fetching chats");
         }
       }
@@ -114,16 +53,10 @@ const ChatWindow = ({
   }, [receiver, user]);
   useEffect(() => {
     if (socket) {
-      socket.on("SendMessage", (message: MessageType) => {
-        console.log("Message: ", message);
-        setChatData((prev) => [...prev, message]);
-      });
+      socket.on("SendMessage", recieveMessages);
     }
     return () => {
-      socket?.off("SendMessage", (message: MessageType) => {
-        console.log("Message: ", message);
-        setChatData((prev) => [...prev, message]);
-      });
+      socket?.off("SendMessage", recieveMessages);
     };
   }, [socket]);
   return (
@@ -138,12 +71,39 @@ const ChatWindow = ({
               imgSrc={receiver?.profilePicture} //Note: change the profile picture to sender currently it is set to the current user
               className=""
             />
-            <UsernameDiv
-              className=""
-              isActive={connectedUsers.some((con) => con.id === receiver.id)}
-            >
+            <UsernameDiv className="" isActive={isActive}>
               {receiver.name}
             </UsernameDiv>
+            {isActive && (
+              <div className="absolute end-10">
+                <IoVideocam
+                  onClick={async () => {
+                    if (user) {
+                      try {
+                        const res = await fetch(
+                          `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/videoCall?receiverId=${receiver.id}`,
+                          {
+                            credentials: "include",
+                          }
+                        );
+                        const resData = await res.json();
+                        if (resData.data.pickedUp) {
+                          router.push(
+                            `/pages/VideoCall/${resData.data.channelName}`
+                          );
+                        } else {
+                          toast.error("Rejected the call");
+                        }
+                      } catch (error) {
+                        toast.error("error occured");
+                        console.log(error);
+                      }
+                    }
+                  }}
+                  className="size-7 hover:cursor-pointer"
+                />
+              </div>
+            )}
           </div>
 
           {/* Messages container - flexible height with scroll */}

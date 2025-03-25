@@ -9,23 +9,36 @@ import {
 } from "react";
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
+import IncomingCallModal from "./ui/sampleModal";
 // Define interface for the Provider props
 interface AppProviderProps {
   children: ReactNode;
+}
+
+interface IncomingCallDetails {
+  senderId: string;
+  channelName: string;
+  senderName?: string;
+  senderProfilePicture?: string;
+  answer: (response: "ACCEPTED" | "REJECTED") => void;
 }
 
 const AppContext = createContext<{
   user: User | null;
   updateUser: (user: User | null) => void;
   socket: Socket | null;
-  connectedUsers: { profilePicture: string; name: string; id: number }[];
+  connectedUsers: { profilePicture: string; name: string; id: string }[];
   allUsers: User[];
+  incomingCall: IncomingCallDetails | null;
+  setIncomingCall: (incomingCall: IncomingCallDetails | null) => void;
 }>({
   user: null,
   updateUser: () => {},
   socket: null,
   connectedUsers: [],
   allUsers: [],
+  incomingCall: null,
+  setIncomingCall: () => {},
 });
 
 export const useAppContext = () => {
@@ -40,13 +53,15 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const [connectedUsers, setConnectedUsers] = useState<User[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [incomingCall, setIncomingCall] = useState<IncomingCallDetails | null>(
+    null
+  );
   useEffect(() => {
     const sock = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
       withCredentials: true,
     });
     setSocket(sock);
     sock.on("userConnected", (data: User[]) => {
-      console.log("Connected Users", data);
       if (data && data.length > 0) {
         setConnectedUsers([...data]);
       } else {
@@ -54,9 +69,17 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       }
     });
     sock.on("new user registered", async () => {
-      console.log("new user registered");
       await getAllUsers();
     });
+
+    sock.on("incomingCall", (callDetails: IncomingCallDetails, callback) => {
+      // Set the incoming call details to trigger modal
+      setIncomingCall({
+        ...callDetails,
+        answer: (response: "ACCEPTED" | "REJECTED") => callback(response),
+      });
+    });
+
     return () => {
       sock.close();
       setSocket(null);
@@ -95,9 +118,20 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 
   return (
     <AppContext.Provider
-      value={{ user, updateUser, socket, connectedUsers, allUsers }}
+      value={{
+        user,
+        updateUser,
+        socket,
+        connectedUsers,
+        allUsers,
+        incomingCall,
+        setIncomingCall: (callDetails: IncomingCallDetails | null) => {
+          setIncomingCall(incomingCall);
+        },
+      }}
     >
       {children}
+      <IncomingCallModal />
     </AppContext.Provider>
   );
 };

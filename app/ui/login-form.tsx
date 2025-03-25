@@ -32,7 +32,7 @@ function LoginForm() {
 
     const resData = await res.json();
     if (resData.statusCode === 200) {
-      updateUser(resData.data);
+      updateUser(resData.data.user);
       toast.success("Login Successful");
       router.push("/");
     } else {

@@ -13,12 +13,12 @@ function ContactCard({
   user: User;
   isActive?: boolean;
   receiver: {
-    id: number;
+    id: string;
     name: string;
     profilePicture: string;
   } | null;
   handleSelectReceiver: (user: {
-    id: number;
+    id: string;
     name: string;
     profilePicture: string;
   }) => void;

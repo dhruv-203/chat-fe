@@ -1,4 +1,4 @@
-export async function sendMessage(message: string, receiverId: number) {
+export async function sendMessage(message: string, receiverId: string) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/sendMessage`,
     {

@@ -14,7 +14,7 @@ const Homepage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [receiver, setReceiver] = useState<{
-    id: number;
+    id: string;
     name: string;
     profilePicture: string;
   } | null>(null);
@@ -48,7 +48,7 @@ const Homepage = () => {
 
   const onToggle = () => setIsOpen(!isOpen);
   const handleSelectReceiver = (user: {
-    id: number;
+    id: string;
     name: string;
     profilePicture: string;
   }) => {

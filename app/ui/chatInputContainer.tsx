@@ -11,9 +11,9 @@ function ChatInputContainer({
   receiverID,
 }: {
   className: string;
-  receiverID: number;
+  receiverID: string;
   receiver: {
-    id: number;
+    id: string;
     name: string;
     profilePicture: string;
   };

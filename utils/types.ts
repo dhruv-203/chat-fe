@@ -1,5 +1,5 @@
 export interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
   profilePicture: string;
@@ -8,8 +8,8 @@ export interface User {
 
 export interface MessageType {
   id: number;
-  senderId: number;
-  receiverId: number;
+  senderId: string;
+  receiverId: string;
   message: string;
   createdAt: string;
 }

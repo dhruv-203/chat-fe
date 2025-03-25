@@ -10,12 +10,12 @@ interface SideBarProps {
   isOpen: boolean;
   className: string;
   receiver: {
-    id: number;
+    id: string;
     name: string;
     profilePicture: string;
   } | null;
   handleSelectReceiver: (user: {
-    id: number;
+    id: string;
     name: string;
     profilePicture: string;
   }) => void;

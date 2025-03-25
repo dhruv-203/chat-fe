@@ -31,7 +31,9 @@ export default function RootLayout({
           autoClose={3000}
           transition={Slide}
         />
-        <AppProvider>{children}</AppProvider>
+        <AppProvider>
+          
+          {children}</AppProvider>
       </body>
     </html>
   );

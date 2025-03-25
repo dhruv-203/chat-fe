@@ -1,4 +1,4 @@
-export async function fetchChatData(receiverId: number, senderId: number) {
+export async function fetchChatData(receiverId: string, senderId: string) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/getAllMessages`,
     {
